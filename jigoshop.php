@@ -108,10 +108,12 @@ if ( ! isset( $_SERVER['REQUEST_URI'] )) {
 }
 
 
+// We need to use this cause our plugin is in a symlinked location, activation_hook fails..
+if ( !defined( 'JIGOSHOP_PLUGIN_PATH' ) ) define( 'JIGOSHOP_PLUGIN_PATH', 'jigoshop/jigoshop.php' );
 // Load administration & check if we need to install
 if ( is_admin() ) {
 	include_once( 'admin/jigoshop-admin.php' );
-	register_activation_hook( __FILE__, 'install_jigoshop' );
+	register_activation_hook( JIGOSHOP_PLUGIN_PATH , 'install_jigoshop' );
 }
 
 
@@ -1230,3 +1232,28 @@ if(!function_exists('jigoshop_log')){
 
     }
 }
+
+/**
+ * Support for Jigoshop being the very first plugin loaded by WordPress
+ *
+ * Will only happen once a user has 'activated' a (any) plugin.
+ *
+ * Ensures our sessions are run first.
+ * Runs last on the 'activated_plugin' hook due to a low priority.
+ *
+ **/
+function jigoshop_plugin_loads_first() {
+	// ensure path to this file is via main wp plugin path
+	//$wp_path_to_this_file = preg_replace( '/(.*)plugins\/(.*)$/', WP_PLUGIN_DIR."/$2", __FILE__ );
+	//$this_plugin = plugin_basename( trim( $wp_path_to_this_file ));
+	$this_plugin = JIGOSHOP_PLUGIN_PATH ;
+	$active_plugins = get_option( 'active_plugins' );
+	$this_plugin_key = array_search( $this_plugin, $active_plugins );
+	if ( $this_plugin_key ) { // if it's 0 it's the first plugin already, no need to continue
+		array_splice( $active_plugins, $this_plugin_key, 1 );
+		array_unshift( $active_plugins, $this_plugin );
+		update_option( 'active_plugins', $active_plugins );
+	}
+}
+// disconnecting for further testing, breaks 'lazy loader plugins' (-JAP-)
+add_action( 'activated_plugin', 'jigoshop_plugin_loads_first', 999 );
