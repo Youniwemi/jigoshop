@@ -23,7 +23,7 @@
 function jigoshop_upgrade() {
 
 	// Get the db version
-	$jigoshop_db_version = get_site_option( 'jigoshop_db_version' );
+	$jigoshop_db_version = get_option( 'jigoshop_db_version' );
 
 	// 'Cause we aint got shiz to do
 	if ( $jigoshop_db_version == JIGOSHOP_VERSION )
@@ -66,7 +66,7 @@ function jigoshop_upgrade() {
 	}
 
 	// Update the db option
-	update_site_option( 'jigoshop_db_version', JIGOSHOP_VERSION );
+	update_option( 'jigoshop_db_version', JIGOSHOP_VERSION );
 
 	return true;
 }
@@ -77,56 +77,56 @@ function jigoshop_upgrade() {
 function jigoshop_convert_db_version() {
 	global $wpdb;
 
-	$jigoshop_db_version = get_site_option('jigoshop_db_version');
+	$jigoshop_db_version = get_option('jigoshop_db_version');
 
 	switch ( $jigoshop_db_version ) {
 		case '0.9.6':
-			update_site_option( 'jigoshop_db_version', 1105310 );
+			update_option( 'jigoshop_db_version', 1105310 );
 			break;
 		case '0.9.7':
-			update_site_option( 'jigoshop_db_version', 1105311 );
+			update_option( 'jigoshop_db_version', 1105311 );
 			break;
 		case '0.9.7.1':
-			update_site_option( 'jigoshop_db_version', 1105312 );
+			update_option( 'jigoshop_db_version', 1105312 );
 			break;
 		case '0.9.7.2':
-			update_site_option( 'jigoshop_db_version', 1105313 );
+			update_option( 'jigoshop_db_version', 1105313 );
 			break;
 		case '0.9.7.3':
-			update_site_option( 'jigoshop_db_version', 1106010 );
+			update_option( 'jigoshop_db_version', 1106010 );
 			break;
 		case '0.9.7.4':
-			update_site_option( 'jigoshop_db_version', 1106011 );
+			update_option( 'jigoshop_db_version', 1106011 );
 			break;
 		case '0.9.7.5':
-			update_site_option( 'jigoshop_db_version', 1106130 );
+			update_option( 'jigoshop_db_version', 1106130 );
 			break;
 		case '0.9.7.6':
-			update_site_option( 'jigoshop_db_version', 1106140 );
+			update_option( 'jigoshop_db_version', 1106140 );
 			break;
 		case '0.9.7.7':
-			update_site_option( 'jigoshop_db_version', 1106220 );
+			update_option( 'jigoshop_db_version', 1106220 );
 			break;
 		case '0.9.7.8':
-			update_site_option( 'jigoshop_db_version', 1106221 );
+			update_option( 'jigoshop_db_version', 1106221 );
 			break;
 		case '0.9.8':
-			update_site_option( 'jigoshop_db_version', 1107010 );
+			update_option( 'jigoshop_db_version', 1107010 );
 			break;
 		case '0.9.8.1':
-			update_site_option( 'jigoshop_db_version', 1109080 );
+			update_option( 'jigoshop_db_version', 1109080 );
 			break;
 		case '0.9.9':
-			update_site_option( 'jigoshop_db_version', 1109200 );
+			update_option( 'jigoshop_db_version', 1109200 );
 			break;
 		case '0.9.9.1':
-			update_site_option( 'jigoshop_db_version', 1111090 );
+			update_option( 'jigoshop_db_version', 1111090 );
 			break;
 		case '0.9.9.2':
-			update_site_option( 'jigoshop_db_version', 1111091 );
+			update_option( 'jigoshop_db_version', 1111091 );
 			break;
 		case '0.9.9.3':
-			update_site_option( 'jigoshop_db_version', 1111092 );
+			update_option( 'jigoshop_db_version', 1111092 );
 			break;
         // The verion of db was updated since 1.0 to the new standard. No point on continuing to
         // add entries here, since anyone that has post 1.0 will also have the
@@ -169,7 +169,7 @@ function jigoshop_upgrade_100() {
 	// Run upgrade
 
     // upgrade option jigoshop_tax_rates
-    $jigoshop_tax_rates = get_site_option('jigoshop_tax_rates');
+    $jigoshop_tax_rates = get_option('jigoshop_tax_rates');
     $tax_rates = array();
 
     if ($jigoshop_tax_rates && is_array($jigoshop_tax_rates)) :
