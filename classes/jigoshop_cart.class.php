@@ -78,6 +78,8 @@ class jigoshop_cart extends Jigoshop_Singleton {
         jigoshop_session::instance()->coupons = self::$applied_coupons;
 
         self::calculate_totals();
+        // could be usefull to set cookies..
+        do_action('set_jigoshop_session');
     }
 	
 	
