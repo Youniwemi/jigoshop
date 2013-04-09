@@ -64,7 +64,8 @@ function jigoshop_post_type() {
             ),
 			'show_ui'   => true,
 			'query_var' => true,
-			'rewrite'   => array( 'slug'=> $category_base . $category_slug, 'with_front'=> false, 'hierarchical'=> true ),
+        	// hierarchical doesn't seem to be working..
+			'rewrite'   => array( 'slug'=> $category_base . $category_slug, 'with_front'=> false, 'hierarchical'=> false ),
         )
     );
 
@@ -214,6 +215,9 @@ function jigoshop_post_type() {
 			'show_ui'          => false,
 			'query_var'        => true,
 			'show_in_nav_menus'=> false,
+        	'capabilities' => array(
+				'assign_terms' => 'assign_product_terms',
+			),
         )
     );
 
