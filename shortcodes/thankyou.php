@@ -54,7 +54,7 @@ function jigoshop_thankyou() {
 				<li class="method">
 					<?php _e('Payment method:', 'jigoshop'); ?>
 					<strong><?php
-						$gateways = jigoshop_payment_gateways::payment_gateways();
+						$gateways = jigoshop_payment_gateways::get_available_payment_gateways();
 						if (isset($gateways[$order->payment_method])) echo $gateways[$order->payment_method]->title;
 						else echo $order->payment_method;
 					?></strong>
