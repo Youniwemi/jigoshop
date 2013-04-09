@@ -89,16 +89,37 @@ class jigoshop_catalog_query extends Jigoshop_Singleton {
 
 		return $request;
 	}
-
+	
+	/**
+	 * Sets number of posts, order by and sort order
+	 *
+	 * Use the 'loop_shop_per_page' filter for adjusting the # of products to show per page on front end Product lists.
+	 *
+	 * Use the 'loop-shop-query' filter to adjust sort order and direction or other front end only arguments.
+	 * @param array $query : the parsed request or query parameters
+	 * @return array - the altered request array is returned to be submitted to 'query_posts' with all filtering done.
+	 */
+	
+	public function do_fitler_catalogue_query($query){
+		$query['post_status'] = 'publish';
+		$query['posts_per_page'] = apply_filters( 'loop_shop_per_page', Jigoshop_Base::get_options()->get_option( 'jigoshop_catalog_per_page' ));
+		
+		// establish any filters for orderby, order and anything else added to the filter
+		$filters = array();
+		$filters = apply_filters( 'loop-shop-query', $filters );
+		foreach( $filters as $key => $value ) :
+			$query[$key] = $value;
+		endforeach;
+		return $query;
+	}
 
 	/**
 	 * Alters the main wordpress query when on a Jigoshop product listing.
 	 *
 	 * The meta-query and tax_query can be filtered using the 'loop_shop_tax_query' and 'loop_shop_tax_meta_query' filters.
 	 *
-	 * Use the 'loop_shop_per_page' filter for adjusting the # of products to show per page on front end Product lists.
+	 * Use the 'do_fitler_catalogue_query' to sets number of posts, order by and sort order
 	 *
-	 * Use the 'loop-shop-query' filter to adjust sort order and direction or other front end only arguments.
 	 *
 	 * The whole resulting request can be filtered using the 'jigoshop-request' filter
 	 *
@@ -114,15 +135,8 @@ class jigoshop_catalog_query extends Jigoshop_Singleton {
 		// we only work on Jigoshop product lists
 		if ( ! $this->is_product_list() ) return $request;
 
-		$request['post_status'] = 'publish';
-		$request['posts_per_page'] = apply_filters( 'loop_shop_per_page', Jigoshop_Base::get_options()->get_option( 'jigoshop_catalog_per_page' ));
-
-		// establish any filters for orderby, order and anything else added to the filter
-		$filters = array();
-		$filters = apply_filters( 'loop-shop-query', $filters );
-		foreach( $filters as $key => $value ) :
-			$request[$key] = $value;
-		endforeach;
+		// sets number of posts, order by and sort order.. 
+		$request = self::do_fitler_catalogue_query($request);
 
 		$request['tax_query'] = apply_filters( 'loop_shop_tax_query', $this->tax_query( $request ));
 

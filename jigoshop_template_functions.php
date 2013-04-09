@@ -39,7 +39,10 @@ if (!function_exists('jigoshop_front_page_archive')) {
 			    $paged = 1;
 			}
 
-			query_posts( array( 'page_id' => '', 'post_type' => 'product', 'paged' => $paged ) );
+			$query = array( 'page_id' => '', 'post_type' => 'product', 'paged' => $paged )  ;
+			// make sure we have the right order ( set up using backoffice ) 
+			$query = jigoshop_catalog_query::do_fitler_catalogue_query($query);
+			query_posts( $query );
 
 			define('SHOP_IS_ON_FRONT', true);
 
