@@ -355,6 +355,8 @@ class jigoshop_product extends Jigoshop_Base {
 			$url = add_query_arg('add-to-cart', $this->ID);
 		}
 
+		// filter to allow url translatation ( qtranslate for example )
+		$url = apply_filters( 'jigoshop_add_to_cart_url', $url );
 		$url = jigoshop::nonce_url( 'add_to_cart', $url );
 		return $url;
 	}
