@@ -254,7 +254,7 @@ class jigoshop_product extends Jigoshop_Base {
 	 */
 	public function requires_shipping() {
 		// If it's virtual or downloadable don't require shipping, same for subscriptions
-		return (!($this->is_type( array('downloadable', 'virtual', 'subscription'))));
+		return (!($this->is_type( apply_filters( 'jigoshop_disabled_shipping' , array('downloadable', 'virtual', 'subscription')))));
 	}
 	/**
 	 * Checks the product type
