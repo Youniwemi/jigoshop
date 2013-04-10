@@ -10,8 +10,8 @@
  *
  * @package             Jigoshop
  * @category            Admin
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 
@@ -392,7 +392,7 @@ $jigoshop_options_settings = apply_filters('jigoshop_options_settings', array(
 
 	array(
 		'name'          => __('View Order Page','jigoshop'),
-		'desc'          => __('Shortcode to place on page:<code>[jigoshop_view_order]</code><br/>Default parent page: My Account','jigoshop'),
+		'desc'          => __('Shortcode to place on page: <code>[jigoshop_view_order]</code><br/>Default parent page: My Account','jigoshop'),
 		'tip'           => '',
 		'id'            => 'jigoshop_view_order_page_id',
 		'css'           => 'min-width:50px;',

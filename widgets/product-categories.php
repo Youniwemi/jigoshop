@@ -10,8 +10,8 @@
  *
  * @package             Jigoshop
  * @category            Widgets
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 
@@ -92,7 +92,7 @@ class Jigoshop_Widget_Product_Categories extends WP_Widget {
 			global $post;
 			$categories = get_the_terms( $post->ID, 'product_cat' );
 			if ( ! empty( $categories ) ) foreach( $categories as $id => $cat ) {
-				$args['current_category'] = $cat->term_id;
+				$args['current_category'] = apply_filters( 'jigoshop_product_cat_widget_terms', $cat->term_id, $categories);
 				break;		// we can only take the first one
 			}
 		}

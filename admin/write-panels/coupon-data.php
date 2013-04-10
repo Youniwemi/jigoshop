@@ -12,8 +12,8 @@
  *
  * @package             Jigoshop
  * @category            Admin
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 
@@ -100,7 +100,7 @@ function jigoshop_coupon_data_box( $post ) {
 				'id'            => 'usage_limit',
 				'label'         => __( 'Usage Limit', 'jigoshop' ),
 				'type'          => 'number',
-				'desc'          => __(sprintf('Times used: %s', !empty( $usage ) ? $usage : '0'), 'jigoshop'),
+				'desc'          => sprintf(__('Times used: %s','jigoshop'), !empty( $usage ) ? $usage : '0'),
 				'tip'           => __('Control how many times this coupon may be used.','jigoshop'),
 				'placeholder'   => '0'
 			);

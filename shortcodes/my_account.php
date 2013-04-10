@@ -10,8 +10,8 @@
  *
  * @package             Jigoshop
  * @category            Customer
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 
@@ -45,7 +45,7 @@ function jigoshop_my_account( $atts ) {
 		<h2><?php _e('Available downloads', 'jigoshop'); ?></h2>
 		<ul class="digital-downloads">
 			<?php foreach ($downloads as $download) : ?>
-				<li><?php if (is_numeric($download['downloads_remaining'])) : ?><span class="count"><?php echo $download['downloads_remaining'] . _n(' download Remaining', ' downloads Remaining', $download['downloads_remaining'], 'jigoshop'); ?></span><?php endif; ?> <a href="<?php echo esc_url( $download['download_url'] ); ?>"><?php echo $download['download_name']; ?></a></li>
+				<li><?php if (is_numeric($download['downloads_remaining'])) : ?><span class="count"><?php echo $download['downloads_remaining'] . _n(' download Remaining', ' downloads Remaining', 'jigoshop'); ?></span><?php endif; ?> <a href="<?php echo esc_url( $download['download_url'] ); ?>"><?php echo $download['download_name']; ?></a></li>
 			<?php endforeach; ?>
 		</ul>
 		<?php endif; ?>
@@ -78,7 +78,7 @@ function jigoshop_my_account( $atts ) {
 							<?php if ($order->formatted_shipping_address) echo $order->formatted_shipping_address; else echo '&ndash;'; ?>
 							</address></td>
 						<?php endif; ?>
-						<td><?php echo jigoshop_price($order->order_total); ?></td>
+						<td><?php echo apply_filters( 'jigoshop_display_order_total', jigoshop_price($order->order_total), $order); ?></td>
 						<td class="nobr"><?php _e($order->status, 'jigoshop'); ?></td>
 						<td class="nobr alignright">
 							<?php if ($order->status=='pending') : ?>
@@ -382,12 +382,16 @@ function jigoshop_view_order() {
         $order = new jigoshop_order($order_id);
 
         if ($order_id > 0 && $order->user_id == get_current_user_id()) :
-
+            do_action('jigoshop_before_order_summary_details', $order->id);
             echo '<p>' . sprintf(__('Order <mark>%s</mark> made on <mark>%s</mark>.', 'jigoshop'), $order->get_order_number(), date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($order->order_date))) . ' ';
             echo sprintf(__('Order status: <mark class="%s">%s</mark>', 'jigoshop'), sanitize_title($order->status), __($order->status, 'jigoshop') );
 
             echo '.</p>';
-            ?>
+           	
+			do_action( 'jigoshop_tracking_details_info', $order );
+			
+			?>
+			<h2><?php _e('Order Details', 'jigoshop'); ?></h2>
             <table class="shop_table">
                 <thead>
                     <tr>
@@ -414,6 +418,9 @@ function jigoshop_view_order() {
                     <td><?php echo $order->get_shipping_to_display(); ?></small></td>
                 </tr><?php
             endif;
+			
+            do_action('jigoshop_processing_fee_after_shipping');
+			
             if ($jigoshop_options->get_option('jigoshop_tax_after_coupon') == 'yes' && $order->order_discount > 0) : ?><tr class="discount">
                 <td colspan="3"><?php _e('Discount', 'jigoshop'); ?></td>
                 <td>-<?php echo jigoshop_price($order->order_discount); ?></td>

@@ -8,11 +8,11 @@
  * versions in the future. If you wish to customise Jigoshop core for your needs,
  * please use our GitHub repository to publish essential changes for consideration.
  *
- * @package		Jigoshop
- * @category	Admin
- * @author		Jigowatt
- * @copyright	Copyright (c) 2011-2012 Jigowatt Ltd.
- * @license		http://jigoshop.com/license/commercial-edition
+ * @package     Jigoshop
+ * @category    Admin
+ * @author      Jigoshop
+ * @copyright   Copyright © 2011-2013 Jigoshop.
+ * @license     http://jigoshop.com/license/commercial-edition
  */
 
 class Jigoshop_Admin_Settings extends Jigoshop_Singleton {
@@ -43,8 +43,8 @@ class Jigoshop_Admin_Settings extends Jigoshop_Singleton {
 	public function settings_scripts() {
 
     	// http://jquerytools.org/documentation/rangeinput/index.html
-    	wp_register_script( 'jquery-tools-slider', 'http://cdn.jquerytools.org/1.2.6/form/jquery.tools.min.js', array( 'jquery' ), '1.2.6' );
-    	wp_enqueue_script( 'jquery-tools-slider' );
+    	wp_register_script( 'jquery-tools', jigoshop::assets_url() . '/assets/js/jquery.tools.min.js', array( 'jquery' ), '1.2.7' );
+    	wp_enqueue_script( 'jquery-tools' );
 
     	wp_register_script( 'jigoshop-bootstrap-tooltip', jigoshop::assets_url() . '/assets/js/bootstrap-tooltip.min.js', array( 'jquery' ), '2.0.3' );
     	wp_enqueue_script( 'jigoshop-bootstrap-tooltip' );
@@ -84,11 +84,11 @@ class Jigoshop_Admin_Settings extends Jigoshop_Singleton {
 		if ( $screen->base <> 'jigoshop_page_jigoshop_settings' && $screen->base <> 'options' ) return;
 		
 		$slug = $this->get_current_tab_slug();
-		$options = $this->our_parser->tabs[$slug];
+		$options = isset( $this->our_parser->tabs[$slug] ) ? $this->our_parser->tabs[$slug] : '';
 
 		if ( ! is_array( $options ) ) {
 			jigoshop_log( "Jigoshop Settings API: -NO- valid options for 'register_settings()' - EXITING with:" );
-			jigoshop_log( $options );
+			jigoshop_log( $slug );
 			return;
 		}
 
@@ -767,7 +767,7 @@ class Jigoshop_Options_Parser {
 
 		$data = Jigoshop_Base::get_options()->get_current_options();
 
-		if ( ! isset( $item['id'] )) return '';   // ensure we have an id to work with
+		if ( ! isset( $item['id'] )) return '';         // ensure we have an id to work with
 		
 		$display = "";					// each item builds it's output into this and it's returned for echoing
 		$class = "";
@@ -796,15 +796,15 @@ class Jigoshop_Options_Parser {
 			break;
 
 		case 'gateway_options':
- 			foreach ( jigoshop_payment_gateways::payment_gateways() as $gateway ) :
- 				$gateway->admin_options();
- 			endforeach;
+			foreach ( jigoshop_payment_gateways::payment_gateways() as $gateway ) :
+				$gateway->admin_options();
+			endforeach;
 			break;
 
 		case 'shipping_options':
- 			foreach ( jigoshop_shipping::get_all_methods() as $shipping_method ) :
- 				$shipping_method->admin_options();
- 			endforeach;
+			foreach ( jigoshop_shipping::get_all_methods() as $shipping_method ) :
+				$shipping_method->admin_options();
+			endforeach;
 			break;
 
 		case 'tax_rates':
@@ -1102,7 +1102,7 @@ class Jigoshop_Options_Parser {
 			jigoshop_log( "UNKOWN _type_ in Options parsing" );
 			jigoshop_log( $item );
 		}
-
+		
 		if ( $item['type'] != 'tab' ) {
 			if ( empty( $item['desc'] ) ) {
 				$explain_value = '';
@@ -1253,27 +1253,27 @@ class Jigoshop_Options_Parser {
 		/* <![CDATA[ */
 			jQuery(function() {
 
-				jQuery('tr.tax_rate .select_none').live('click', function(){
+				jQuery(document.body).on('click', 'tr.tax_rate .select_none', function(){
 					jQuery(this).closest('td').find('select option').removeAttr("selected");
 					jQuery(this).closest('td').find('select.tax_select2').trigger("change");
 					return false;
 				});
-				jQuery('tr.tax_rate .select_us_states').live('click', function(e){
+				jQuery(document.body).on('click', 'tr.tax_rate .select_us_states', function(e){
 					jQuery(this).closest('td').find('select optgroup[label="<?php _e( 'United States', 'jigoshop' ); ?>"] option').attr("selected","selected");
 					jQuery(this).closest('td').find('select.tax_select2').trigger("change");
 					return false;
 				});
-				jQuery('tr.tax_rate .options select').live('change', function(e){
+				jQuery(document.body).on('change', 'tr.tax_rate .options select', function(e){
 					jQuery(this).trigger("liszt:updated");
 					jQuery(this).closest('td').find('label').text( jQuery(":selected", this).length + ' ' + '<?php _e('countries/states selected', 'jigoshop'); ?>' );
 				});
-				jQuery('tr.tax_rate .select_europe').live('click', function(e){
+				jQuery(document.body).on('click', 'tr.tax_rate .select_europe', function(e){
 					jQuery(this).closest('td').find('option[value="BE"],option[value="FR"],option[value="DE"],option[value="IT"],option[value="LU"],option[value="NL"],option[value="DK"],option[value="IE"],option[value="GR"],option[value="PT"],option[value="ES"],option[value="AT"],option[value="FI"],option[value="SE"],option[value="CY"],option[value="CZ"],option[value="EE"],option[value="HU"],option[value="LV"],option[value="LT"],option[value="MT"],option[value="PL"],option[value="SK"],option[value="SI"],option[value="RO"],option[value="BG"],option[value="IM"],option[value="GB"]').attr("selected","selected");
 					jQuery(this).closest('td').find('select.tax_select2').trigger("change");
 					return false;
 				});
 
-				jQuery('#jigoshop_tax_rates a.add').live('click', function() {
+				jQuery(document.body).on('click', '#jigoshop_tax_rates a.add', function() {
 					var size = jQuery('.tax_rate_rules tbody tr').size();
 					jQuery('<tr> \
 							<td><a href="#" class="remove button">&times;</a></td> \
@@ -1292,7 +1292,7 @@ class Jigoshop_Options_Parser {
 					jQuery('#tax_country_' + size).select2();
 					return false;
 				});
-				jQuery('#jigoshop_tax_rates a.remove').live('click', function(){
+				jQuery(document.body).on('click', '#jigoshop_tax_rates a.remove', function(){
 					var answer = confirm("<?php _e('Delete this rule?', 'jigoshop'); ?>");
 					if (answer) jQuery(this).parent().parent().remove();
 					return false;

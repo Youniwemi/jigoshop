@@ -12,8 +12,8 @@
  *
  * @package             Jigoshop
  * @category            Admin
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 
@@ -95,8 +95,9 @@ function jigoshop_order_data_meta_box($post) {
 			<select id="customer_user" name="customer_user">
 				<option value=""><?php _e('Guest', 'jigoshop') ?></option>
 				<?php
-					$users = new WP_User_Query( array( 'orderby' => 'display_name' ) );
-					$users = $users->get_results();
+					$users_fields = array( 'ID', 'display_name', 'user_email' );
+					$users = new WP_User_Query( array( 'orderby' => 'display_name', 'fields' => $users_fields ) );
+ 					$users = $users->get_results();
 					if ($users) foreach ( $users as $user ) :
 						echo '<option value="'.esc_attr($user->ID).'" '; selected($data['customer_user'], $user->ID); echo '>' . $user->display_name . ' ('.$user->user_email.')</option>';
 					endforeach;
@@ -116,7 +117,7 @@ function jigoshop_order_data_meta_box($post) {
 
 		<div id="order_customer_billing_data" class="panel jigoshop_options_panel">
             <?php
-            //display billing fieds and values
+				// display billing fields and values
 
                 $billing_fields = array(
 					'company'   => __('Company', 'jigoshop'),
@@ -132,6 +133,18 @@ function jigoshop_order_data_meta_box($post) {
 					'email'     => __('Email Address', 'jigoshop'),
 				);
 
+				if ( isset( $data['billing_euvatno'] )) {
+					$start = $billing_fields;
+					array_splice( $start, 1 );
+					$end = $billing_fields;
+					array_splice( $end, 0, 1 );
+					$billing_fields = array_merge(
+						$start,
+						array( 'euvatno' => __('EU VAT Number', 'jigoshop') ),
+						$end
+					);
+				}
+				
                 foreach($billing_fields as $field_id => $field_desc) {
                     $field_id = 'billing_' . $field_id;
                     $field_value = '';
@@ -452,6 +465,7 @@ function jigoshop_order_totals_meta_box($post) {
 			}
 			$payment_select .= "</select>";
 		?>
+		<?php do_action( 'jigoshop_admin_order_totals_after_shipping', $post->ID ) ?>
 		<li>
 			<label><?php _e('Total:', 'jigoshop'); ?></label>
             <input type="text" id="order_total" name="order_total" placeholder="0.00" value="<?php echo esc_attr( $_order->get_value_from_data('order_total') ); ?>" class="first" /> <?php echo $payment_select; ?>

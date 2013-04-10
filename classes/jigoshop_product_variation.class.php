@@ -12,8 +12,8 @@
  *
  * @package             Jigoshop
  * @category            Catalog
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 class jigoshop_product_variation extends jigoshop_product {
@@ -73,6 +73,41 @@ class jigoshop_product_variation extends jigoshop_product {
 	 */
 	public function get_variation_attributes() {
 		return $this->variation_data; // @todo: This returns blank if its set to catch all, how would we deal with that?
+	}
+
+	/**
+	 * Returns the products current price, either regular or sale
+	 *
+	 * @return  int
+	 */
+	public function get_price() {
+
+		$price = null;
+		if ( $this->is_on_sale() ) {
+			if ( strstr($this->sale_price,'%') ) {
+				$price = round($this->regular_price * ( (100 - str_replace('%','',$this->sale_price) ) / 100 ), 4);
+			} else if ( $this->sale_price ) {
+				$price = $this->sale_price;
+			}
+		} else {
+			$price = apply_filters('jigoshop_product_get_regular_price', $this->regular_price, $this->variation_id);
+		}
+		return apply_filters( 'jigoshop_product_get_price', $price, $this->variation_id );
+
+	}
+
+	/**
+	 * Check the stock levels to unsure we have enough to match request
+	 *
+	 * @param   int $quantity   Amount to verify that we have
+	 * @return  bool
+	 */
+	public function has_enough_stock( $quantity ) {
+		// always work from a new product to check actual stock available
+		// this product instance could be sitting in a Cart for a user and
+		// another customer purchases the last available
+		$temp = new jigoshop_product_variation( $this->get_variation_id() );
+		return ($this->backorders_allowed() || $temp->stock >= $quantity);
 	}
 
 	/**

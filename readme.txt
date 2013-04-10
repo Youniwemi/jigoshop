@@ -1,10 +1,10 @@
 === Jigoshop ===
-Contributors: Jigowatt
+Contributors: Jigoshop
 Tags: ecommerce, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, jigowatt, shipping, inventory, stock, online, sell, sales, weights, dimensions, configurable, variable, downloadable, external, affiliate, download, virtual, physical
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@jigowatt.co.uk&item_name=Donation+for+Jigoshop
-Requires at least: 3.3
-Tested up to: 3.5 RC2
-Stable tag: 1.4.8
+Requires at least: 3.4
+Tested up to: 3.5.1
+Stable tag: 1.6.2
 
 A feature-packed eCommerce plugin built upon WordPress core functionality ensuring excellent performance and customizability.
 
@@ -112,6 +112,82 @@ However, if you want priority, dedicated support from Jigoshop staff, we do offe
 4. Standard customer checkout screen
 
 == Changelog ==
+= 1.6.2 - 2013-03-27 =
+* Tweak: Updated Spanish translation courtesy of David Bravo
+* Tweak: Updated Brazilian translations courtesy of Raphael Suzuki
+* Fix: Attributes not listed for variations no longer appear on Variations
+* Fix: Virtual products will no longer show incorrect file URL in emails
+* Fix: Allow the Jigoshop plugin to be deleted via the WordPress Plugin Manager
+
+= 1.6.1 - 2013-03-18 =
+* New: Added option to Settings->Catalog & Pricing Tab to determine product button display and actions of the Shop page
+* Tweak: Updated .pot file for language translators
+* Tweak: Add a filter to single product pages for extensions and themes to add large image CSS classes
+* Fix: Edit Product->Attributes checkboxes for 'display on product page' now save correctly
+* Fix: Repair single-product-reviews template error message
+
+= 1.6 - 2013-03-05 =
+* New: VAT reduction -after- processing an Order for customers out of the Shop Base Country and with a valid EU VAT Number for EU Countries
+* New: Authenticated customers can now log out and back in again on a different device and get their cart back
+* New: Added default attributes for variable products to be pre-selected on front end Product page
+* New: Added a Wordpress 'Shop Manager' role for Users
+* New: Support for WP-PageNavi plugin
+* Tweak: Added 2 options on Settings->General for displaying certain messages on the Checkout
+* Tweak: Updated Brazilian translations courtesy of Raphael Suzuki
+* Tweak: Updated Ukranian translations courtesy of Anatolii Sakhnik
+* Tweak: Updated French translations courtesy of Laurent Dinclaux
+* Fix: products on sale shortcode now accurately displays simple products on sale
+* Fix: internal product attributes and variations saving of custom text attributes
+* Fix: Adding products to the Cart if not sufficient stock available
+* Fix: Variations now check for sufficient stock available
+* Fix: Reports date range selectors now work in all browsers
+* Fix: Order notes now appear on Orders in the Admin
+
+= 1.5.1 - 2013-02-01 =
+* Fix: 3rd party Shipping modules and Payment gateways will now display in settings
+
+= 1.5 - 2013-01-29 =
+* New: General tab setting to display 'Return to Shop' button on the Cart page
+* New: Products tab setting to adjust thumbnail images per row on Product pages
+* New: Core additions for the new Jigoshop Multiple Currency extension
+	* http://jigoshop.com/product/jigoshop-multiple-currencies/
+* New: Limited theme support for twenty-twelve
+* New: Checkout zip and postal code validation for most countries enabled with setting on General Tab
+* Tweak: Add existing currencies for most countries
+* Tweak: Checkout will not longer -require- the 'state' field on countries that don't have states
+* Tweak: Checkout now shows selected shipping destination the same as the Cart
+* Tweak: updated .pot file for language translators
+* Tweak: Updated Brazilian translations courtesy of Raphael Suzuki
+* Tweak: Updated Ukranian translations courtesy of Anatolii Sakhnik
+* Tweak: Updated Japanese translations courtesy of @bigtom
+* Tweak: Updated Czech translations courtesy of Jaroslav Ondra
+* Tweak: Updated Russian translations courtesy of Алексей Важнов
+* Tweak: Checkout will display message asking customers to verify their state when required before ordering
+* Tweak: PayPal gateway will show one item for all items with 'Catalog prices include tax'
+     * This prevents tax rounding errors at PayPal with that setting
+* Fix: Small tax rounding error for 'Catalog prices include tax' on Cart and Checkout
+* Fix: Totals for 'Catalog prices include tax' correct for states other than base with multiple cart items
+* Fix: Taxes after coupon had wrong tax calcs with non-taxable products
+* Fix: Cart widget displays correct subtotals for 'Catalog prices include tax'
+* Fix: Products no longer on sale if out of established date range
+* Fix: Product variations display correct price when on sale
+* Fix: Variable products no longer show the sale price as the cheapest price if out of established date range
+* Fix: Coupon usage counter now increments after each use of a coupon
+* Fix: Reports top earners now gives correct totals
+* Fix: Global Attribute type of 'select' no longer available to apply to a product
+* Fix: Correct applied discount and totals for cart and product discounts larger than required for 0.00 total
+* Fix: Products in Cart won't process if stock is no longer available and Backorders not allowed
+* Fix: New Order emails no longer sent out to customers when the setting to reset pending orders to on-hold is used
+
+= 1.4.9 - 2012-12-13 =
+* New: Lithuanian translations courtesy of Jonas Gavelis
+* Tweak: Updated Ukranian translations courtesy of Anatolii Sakhnik
+* Tweak: Updated Brazilian translations courtesy of Raphael Suzuki
+* Tweak: Improved template loader for Child themes and Parent themes
+* Tweak: Remove Wordpress caching of shortcodes, improve compatibility with other caching plugins for Cart and Checkout
+* Tweak: PayPal basic will not display shipping address unless option in paypal gateway settings is enabled
+* Fix: Product Category pages no longer 404 error (not found)
+
 = 1.4.8 - 2012-12-03 =
 * Fix: Out of base state taxes are now correct with setting 'Catalog prices include tax'
 * Fix: Fatal error on product backorder emails

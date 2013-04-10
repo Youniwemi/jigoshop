@@ -10,8 +10,8 @@
  *
  * @package             Jigoshop
  * @category            Core
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 include_once('cart.php');
@@ -22,22 +22,9 @@ include_once('pay.php');
 include_once('thankyou.php');
 
 function jigoshop_shortcode_wrapper( $function, $atts = array() ) {
-	/*$key = $function.'-shortcode-'.serialize($atts);
-	if ( $shortcode = wp_cache_get($key, 'jigoshop') )
-		return $shortcode;
-
-	// Get the shortcode & save in object cache
+	// WordPress caching of shortcodes stripped out in version 1.4.9 for compatibility with Cache plugins on Cart and Checkout
 	ob_start();
-	call_user_func($function, $atts);
-	$shortcode = ob_get_clean();
-	wp_cache_replace($key, $shortcode, 'jigoshop');
-
-	return $shortcode;
-	
-	*/
-	// don't need caching here.. ( messing with apc ) , jigoshop shortcodes
-	ob_start();
-	call_user_func($function, $atts);
+	call_user_func( $function, $atts );
 	return ob_get_clean();
 }
 
@@ -351,7 +338,7 @@ function jigoshop_product_add_to_cart( $atts ) {
 
 //### Search shortcode #########################################################
 
-function jigoshop_search_shortcode( $atts ) {
+function jigoshop_search_shortcode( $args ) {
 
 	// Extract the arguments
 	extract( $args );
@@ -374,7 +361,7 @@ function jigoshop_search_shortcode( $atts ) {
 //### Sale products shortcode #########################################################
 
 function jigoshop_sale_products( $atts ) {
-	global $columns, $per_page, $paged;
+	global $columns, $per_page, $paged, $wpdb;
 
 	extract(shortcode_atts(array(
 		'per_page'                  => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_per_page'),
@@ -384,46 +371,17 @@ function jigoshop_sale_products( $atts ) {
 		'pagination'                => false
 	), $atts));
 
-  	$today = date('Y-m-d',time());
-  	$tomorrow = date('Y-m-d',mktime(0, 0, 0, date("m"), date("d")+1, date("Y")) );
+	$today = current_time('timestamp');
 
-	$args = array(
-		'post_type'                 => array( 'product' ),
-		'post_status'               => 'publish',
-		'ignore_sticky_posts'       => 1,
-		'posts_per_page'            => $per_page,
-		'orderby'                   => $orderby,
-		'order'                     => $order,
-		'paged'                     => $paged,
-		'meta_query'                => array(
-				array(
-						'key'       => 'visibility',
-						'value'     => array( 'catalog', 'visible' ),
-						'compare'   => 'IN'
-				),
-				array(
-						'key'       => 'sale_price',
-						'value'     => '',
-						'compare'   => '!=',
-				),
-				array(
-						'key'       => 'sale_price_dates_from',
-						'value'     => array( '', $today ),
-						'compare'   => '<=',
-				),
-				array(
-						'key'       => 'sale_price_dates_to',
-						'value'     => array( '', $tomorrow ),
-						'compare'   => '<=',
-				),
-		)
-	);
-	@query_posts($args);
+	// TODO: currently as of Jigoshop 1.6, this still won't handle variations
+	$sql = "SELECT wp_posts.* FROM wp_posts INNER JOIN wp_postmeta ON (wp_posts.ID = wp_postmeta.post_id) INNER JOIN wp_postmeta AS mt1 ON (wp_posts.ID = mt1.post_id) INNER JOIN wp_postmeta AS mt2 ON (wp_posts.ID = mt2.post_id) INNER JOIN wp_postmeta AS mt3 ON (wp_posts.ID = mt3.post_id) INNER JOIN wp_postmeta AS mt4 ON (wp_posts.ID = mt4.post_id) INNER JOIN wp_postmeta AS mt5 ON (wp_posts.ID = mt5.post_id) WHERE 1=1 AND wp_posts.post_type = 'product' AND (wp_posts.post_status = 'publish') AND ( (wp_postmeta.meta_key = 'visibility' AND CAST(wp_postmeta.meta_value AS CHAR) IN ('catalog','visible')) AND (mt1.meta_key = 'sale_price' AND CAST(mt1.meta_value AS CHAR) != '') AND ((mt2.meta_key = 'sale_price_dates_from' AND CAST(mt2.meta_value AS SIGNED) <= %d) OR (mt3.meta_key = 'sale_price_dates_from' AND CAST(mt3.meta_value AS CHAR) = '')) AND ((mt4.meta_key = 'sale_price_dates_to' AND CAST(mt4.meta_value AS SIGNED) >= %d) OR (mt5.meta_key = 'sale_price_dates_to' AND CAST(mt5.meta_value AS CHAR) = '') )) GROUP BY wp_posts.ID ORDER BY wp_posts.post_title ".$order;
+	
+	global $jigoshop_sale_products;
+	$jigoshop_sale_products = $wpdb->get_results( $wpdb->prepare( $sql, $today, $today ), OBJECT );
 	ob_start();
-	jigoshop_get_template_part( 'loop', 'shop' );
+	load_template( jigoshop::plugin_path() . '/templates/loop-on_sale.php',false );
 	if ( $pagination ) do_action( 'jigoshop_pagination' );
-	wp_reset_query();
-	return ob_get_clean();
+	return ob_get_clean();	
 }
 add_shortcode('sale_products', 'jigoshop_sale_products');
 

@@ -10,8 +10,8 @@
  *
  * @package             Jigoshop
  * @category            Checkout
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 
@@ -33,21 +33,38 @@ class skrill extends jigoshop_payment_gateway {
 
 		$this->id        = 'skrill';
 		$this->title     = 'Skrill';
-		$this->icon      = jigoshop::assets_url() . '/assets/images/icons/skrill.png';
+
 		$this->has_fields= false;
 		$this->enabled   = Jigoshop_Base::get_options()->get_option('jigoshop_skrill_enabled');
 		$this->title     = Jigoshop_Base::get_options()->get_option('jigoshop_skrill_title');
 		$this->email     = Jigoshop_Base::get_options()->get_option('jigoshop_skrill_email');
 		$this->locale    = $this->getLocale();
+		
+		$skrillIcon = Jigoshop_Base::get_options()->get_option('jigoshop_skrill_icon');
+		if ( !filter_var( $skrillIcon, FILTER_VALIDATE_URL )) {
+			$this->icon	= jigoshop::assets_url() . '/assets/images/icons/skrill.png';
+		} else {
+			$this->icon = $skrillIcon;
+		}
+		
+		$pMeth = (array)Jigoshop_Base::get_options()->get_option('jigoshop_skrill_payment_methods_multicheck');
+		$cList = '';
+		foreach ( $pMeth as $key => $value ) {	
+			if ( $value ) {
+				$cList = $cList . $key . ','; 
+			}
+		}
+		$cList = rtrim( $cList, "," );
+		$this->payment_methods = $cList;
+	 	
+		add_action( 'init', array( $this, 'check_status_response') );
 
-		add_action( 'init', array(&$this, 'check_status_response') );
-
-		if(isset($_GET['skrillPayment']) && $_GET['skrillPayment'] == true):
-			add_action( 'init', array(&$this, 'generate_skrill_form') );
+		if ( isset($_GET['skrillPayment']) && $_GET['skrillPayment'] == true ) :
+			add_action( 'init', array( $this, 'generate_skrill_form' ) );
 		endif;
 
-		add_action('valid-skrill-status-report', array(&$this, 'successful_request') );
-		add_action('receipt_skrill', array(&$this, 'receipt_skrill'));
+		add_action('valid-skrill-status-report', array( $this, 'successful_request' ) );
+		add_action('receipt_skrill', array( $this, 'receipt_skrill' ));
 
     }
 
@@ -73,7 +90,11 @@ class skrill extends jigoshop_payment_gateway {
 		$defaults = array();
 
 		// Define the Section name for the Jigoshop_Options
-		$defaults[] = array( 'name' => __('Skrill (Moneybookers)', 'jigoshop'), 'type' => 'title', 'desc' => __('Skrill works by using an iFrame to submit payment information securely to Moneybookers.', 'jigoshop') );
+		$defaults[] = array( 	
+			'name' => __('Skrill (Moneybookers)', 'jigoshop'), 
+			'type' => 'title', 
+			'desc' => __('Skrill works by using an iFrame to submit payment information securely to Moneybookers.', 'jigoshop') 
+		);
 
 		// List each option in order of appearance with details
 		$defaults[] = array(
@@ -85,8 +106,7 @@ class skrill extends jigoshop_payment_gateway {
 			'type' 		=> 'checkbox',
 			'choices'	=> array(
 				'no'			=> __('No', 'jigoshop'),
-				'yes'			=> __('Yes', 'jigoshop')
-			)
+				'yes'			=> __('Yes', 'jigoshop') )
 		);
 
 		$defaults[] = array(
@@ -125,6 +145,31 @@ class skrill extends jigoshop_payment_gateway {
 			'type' 		=> 'text'
 		);
 
+		$defaults[] = array (
+			'name'      => __('Skrill payment icon','jigoshop'),
+			'desc'      => __('Use the full URL to the image including http://','jigoshop'),
+			'tip'		=> __('The URL to an icon image to display on the Checkout','jigoshop'),
+			'id'		=> 'jigoshop_skrill_icon',
+			'std' 		=> $this->icon,
+			'type' 		=> 'text'
+		);
+
+		$defaults[] = array(
+			'name'		=> __('Skrill payment methods','jigoshop'),
+			'desc' 		=> __('Select a max of 5. See page 40 for more info <br>https://www.moneybookers.com/merchant/en/moneybookers_gateway_manual.pdf. <br>Leave empty for default.'),
+			'tip' 		=> __('The type of payments that should be allowed via Skrill.'),
+			'id' 			=> 'jigoshop_skrill_payment_methods_multicheck',
+			'type' 		=> 'multicheck',
+			'std'       => 'ACC',
+			'choices'	=> array(
+				'ACC'           => __('All credit card types','jigoshop'),
+				'VSA'           => __('Visa','jigoshop'),
+				'MSC'           => __('MasterCard','jigoshop'),
+				'VSE'           => __('Visa Electron','jigoshop')
+			),
+			'extra'		=> array( 'vertical' )
+		);
+		
 		return $defaults;
 	}
 
@@ -161,15 +206,15 @@ class skrill extends jigoshop_payment_gateway {
 			'new_window_redirect'  => 0,
 			'prepare_only'         => 0,
 			'return_url_target'    => 1,
-			'cancel_url'           => trailingslashit(get_bloginfo('wpurl')).'?skrillListener=skrill_cancel',
+			'cancel_url'           => trailingslashit(get_bloginfo('url')).'?skrillListener=skrill_cancel',
 			'cancel_url_target'    => 1,
-			'status_url'           => trailingslashit(get_bloginfo('wpurl')).'?skrillListener=skrill_status',
+			'status_url'           => trailingslashit(get_bloginfo('url')).'?skrillListener=skrill_status',
 			'language'             => $this->getLocale(),
 			'hide_login'           => 1,
-			'confirmation_note'    => 'Thank you for your custom',
+			'confirmation_note'    => __('Thank you for shopping','jigoshop'),
+						
 			'pay_from_email'       => $order->billing_email,
 
-			//'title'              => 'Mr',
 			'firstname'            => $order->billing_first_name,
 			'lastname'             => $order->billing_last_name,
 			'address'              => $order->billing_address_1,
@@ -183,8 +228,9 @@ class skrill extends jigoshop_payment_gateway {
 			'amount'               => $order_total,
 			'currency'             => Jigoshop_Base::get_options()->get_option('jigoshop_currency'),
 			'detail1_description'  => 'Order ID',
-			'detail1_text'         => $order_id
+			'detail1_text'         => $order_id,
 
+			'payment_methods'				=> $this->payment_methods
 		);
 
 		// Cart Contents

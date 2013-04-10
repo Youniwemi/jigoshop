@@ -10,8 +10,8 @@
  *
  * @package             Jigoshop
  * @category            Catalog
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
  ?>
@@ -45,7 +45,7 @@
 
 		echo '<div class="star-rating" title="'.sprintf(__('Rated %s out of 5', 'jigoshop'),$average).'"><span style="width:'.($average*16).'px"><span class="rating">'.apply_filters('jigoshop_single_product_reviews_rating', $average).'</span> '.__('out of 5', 'jigoshop').'</span></div>';
 
-		echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'jigoshop'), '<span class="count">'.apply_filters('jigoshop_single_product_reviews_count', $count).'</span>', '<span class="item fn">'.wptexturize($post->post_title).'</span>' ).'</h2>';
+		echo '<h2>'.sprintf( _n('%s review for %s', '%s reviews for %s', $count, 'jigoshop'), '<span class="count">'.apply_filters('jigoshop_single_product_reviews_count', $count).'</span>', '<span class="item fn">'.wptexturize($post->post_title).'</span>').'</h2>';
 
 		echo '</div>';
 

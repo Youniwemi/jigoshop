@@ -10,8 +10,8 @@
  *
  * @package             Jigoshop
  * @category            Widgets
- * @author              Jigowatt
- * @copyright           Copyright © 2011-2012 Jigowatt Ltd.
+ * @author              Jigoshop
+ * @copyright           Copyright © 2011-2013 Jigoshop.
  * @license             http://jigoshop.com/license/commercial-edition
  */
 class Jigoshop_Widget_Price_Filter extends WP_Widget {
@@ -117,7 +117,7 @@ class Jigoshop_Widget_Price_Filter extends WP_Widget {
 			<div class="price_slider_wrapper">
 				<div class="price_slider"></div>
 				<div class="price_slider_amount">
-					<button type="submit" class="button">Filter</button>' . __( 'Price: ', 'jigoshop' ) . '<span></span>
+					<button type="submit" class="button">'.__('Filter','jigoshop').'</button>' . __( 'Price: ', 'jigoshop' ) . '<span></span>
 					<input type="hidden" id="max_price" name="max_price" value="' . esc_attr( $max ) . '" />
 					<input type="hidden" id="min_price" name="min_price" value="0" />
 					';
@@ -128,6 +128,7 @@ class Jigoshop_Widget_Price_Filter extends WP_Widget {
 		}
 		echo '
 				</div>
+				<div class="clear"></div>
 			</div>
 		</form>';
 
