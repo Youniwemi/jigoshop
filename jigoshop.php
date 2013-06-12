@@ -22,9 +22,9 @@
  * Author:              Jigoshop
  * Author URI:          http://jigoshop.com
  *
- * Version:             1.6.2
- * Requires at least:   3.4
- * Tested up to:        3.5.1
+ * Version:             1.7.1
+ * Requires at least:   3.5
+ * Tested up to:        3.6-beta3-24432
  *
  * Text Domain:         jigoshop
  * Domain Path:         /languages/
@@ -42,7 +42,7 @@
  * @license             http://jigoshop.com/license/commercial-edition
  */
 
-if ( !defined( "JIGOSHOP_VERSION" )) define( "JIGOSHOP_VERSION", 1303180) ;
+if ( !defined( "JIGOSHOP_VERSION" )) define( "JIGOSHOP_VERSION", 1306100 ) ;
 if ( !defined( "JIGOSHOP_OPTIONS" )) define( "JIGOSHOP_OPTIONS", 'jigoshop_options' );
 if ( !defined( 'JIGOSHOP_TEMPLATE_URL' ) ) define( 'JIGOSHOP_TEMPLATE_URL', 'jigoshop/' );
 if ( !defined( "PHP_EOL" )) define( "PHP_EOL", "\r\n" );
@@ -76,7 +76,7 @@ include_once( 'gateways/bank_transfer.php' );
 include_once( 'gateways/cheque.php' );
 include_once( 'gateways/cod.php' );
 include_once( 'gateways/paypal.php' );
-include_once( 'gateways/skrill.php' );
+include_once( 'gateways/futurepay.php' );
 
 include_once( 'shipping/shipping_method.class.php' );
 include_once( 'shipping/jigoshop_calculable_shipping.php' );
@@ -125,10 +125,10 @@ function jigoshop_init() {
 
 	/* ensure nothing is output to the browser prior to this (other than headers) */
 	ob_start();
-	
+
 	// http://www.geertdedeckere.be/article/loading-wordpress-language-files-the-right-way
 	// this means that all Jigoshop extensions, shipping modules and gateways must load their text domains on the 'init' action hook
-	// 
+	//
 	// Override default translations with custom .mo's found in wp-content/languages/jigoshop first.
 	load_textdomain( 'jigoshop', WP_LANG_DIR.'/jigoshop/jigoshop-'.get_locale().'.mo' );
 	load_plugin_textdomain( 'jigoshop', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
@@ -146,7 +146,7 @@ function jigoshop_init() {
 	jigoshop_session::instance();               // Start sessions if they aren't already
 	jigoshop::instance();                       // Utility functions, uses sessions
 	jigoshop_customer::instance();              // Customer class, sorts session data such as location
-	
+
 	// Jigoshop will instantiate gateways and shipping methods on this same 'init' action hook
 	// with a very low priority to ensure text domains are loaded first prior to installing any external options
 	jigoshop_shipping::instance();              // Shipping class. loads shipping methods
@@ -288,7 +288,7 @@ function jigoshop_roles_init() {
 add_action( 'template_redirect', 'jigoshop_frontend_scripts' );
 function jigoshop_frontend_scripts() {
 
-	if ( ! is_jigoshop() && is_admin() ) return false;
+	if ( is_admin() ) return false;
 
     $jigoshop_options = Jigoshop_Base::get_options();
 
@@ -321,19 +321,20 @@ function jigoshop_frontend_scripts() {
 		wp_enqueue_style( 'jigoshop_theme_styles', $theme_css );
 	}
 
-	 if ( $jigoshop_options->get_option( 'jigoshop_disable_fancybox' ) == 'no' ) {
-		wp_enqueue_style( 'jigoshop_fancybox_styles', jigoshop::assets_url() . '/assets/css/fancybox.css' );
-		wp_enqueue_script( 'fancybox', jigoshop::assets_url().'/assets/js/jquery.fancybox-1.3.4.pack.js', array('jquery'));
+	if ( $jigoshop_options->get_option( 'jigoshop_disable_fancybox' ) == 'no' ) {
+		wp_enqueue_style( 'prettyphoto_styles', jigoshop::assets_url().'/assets/css/prettyPhoto.css' );
+		wp_enqueue_script( 'prettyphoto', jigoshop::assets_url().'/assets/js/jquery.prettyPhoto.js', array('jquery'), '1.4.15');
 	}
 
 	wp_enqueue_style( 'jqueryui_styles', jigoshop::assets_url().'/assets/css/ui.css' );
-	wp_enqueue_script( 'jqueryui', jigoshop::assets_url().'/assets/js/jquery-ui-1.9.2.min.js', array('jquery'), '1.9.2' );
+	wp_enqueue_script( 'jqueryui', jigoshop::assets_url().'/assets/js/jquery-ui-1.9.2.min.js', array('jquery'), '1.9.2');
 
-	wp_enqueue_script( 'jigoshop_blockui', jigoshop::assets_url().'/assets/js/blockui.js', array('jquery'));
-	wp_enqueue_script( 'jigoshop_frontend', jigoshop::assets_url().'/assets/js/jigoshop_frontend.js', array('jquery'));
-	wp_enqueue_script( 'jigoshop_script', jigoshop::assets_url().'/assets/js/script.js', array('jquery'));
+	wp_enqueue_script( 'jigoshop_blockui', jigoshop::assets_url().'/assets/js/blockui.js', array('jquery') );
+	wp_enqueue_script( 'jigoshop_frontend', jigoshop::assets_url().'/assets/js/jigoshop_frontend.js', array('jquery') );
+	wp_enqueue_script( 'jigoshop_script', jigoshop::assets_url().'/assets/js/script.js', array('jquery') );
 
 	/* Script.js variables */
+	// TODO: clean this up, a lot aren't even used anymore, do away with it
 	$jigoshop_params = array(
 		'ajax_url' 						=> admin_url('admin-ajax.php'),
 		'assets_url' 					=> jigoshop::assets_url(),
@@ -437,6 +438,25 @@ function jigoshop_admin_scripts() {
 }
 
 
+/**
+ *  Jigoshop requires minumum jQuery 1.7 since it uses functions like .on() for events.
+ *  If, by the time 'wp_print_scripts' is called and jQuery is outdated (i.e not
+ *  using the version in the WP core), we need to de-register it and register the
+ *  core version of the file.
+ */
+add_action( 'wp_print_scripts', 'jigoshop_check_jquery', 99 );
+function jigoshop_check_jquery() {
+	global $wp_scripts;
+
+	// Enforce minimum version of jQuery from WordPress 3.5 core which is 1.8.3
+	if ( ! empty( $wp_scripts->registered['jquery']->ver ) && ! empty( $wp_scripts->registered['jquery']->src ) && $wp_scripts->registered['jquery']->ver < '1.7' ) {
+		wp_deregister_script( 'jquery' );
+		wp_register_script( 'jquery', '/wp-includes/js/jquery/jquery.js', array(), '1.8.3' );
+		wp_enqueue_script( 'jquery' );
+	}
+}
+
+
 //### Functions #########################################################
 
 /**
@@ -533,7 +553,7 @@ add_action( 'wp_footer', 'jigoshop_demo_store' );
 function jigoshop_demo_store() {
 
 	if ( Jigoshop_Base::get_options()->get_option( 'jigoshop_demo_store' ) == 'yes' && is_jigoshop() ) :
-		
+
 		$bannner_text = apply_filters( 'jigoshop_demo_banner_text', __('This is a demo store for testing purposes &mdash; no orders shall be fulfilled.', 'jigoshop') );
 		echo '<p class="demo_store">'.$bannner_text.'</p>';
 
@@ -904,7 +924,7 @@ function jigoshop_get_formatted_variation( $variation = '', $flat = false ) {
 			$return = '<dl class="variation">';
 		endif;
 
-		$varation_list = array();
+		$variation_list = array();
 
 		foreach ($variation as $name => $value) :
 
@@ -916,21 +936,26 @@ function jigoshop_get_formatted_variation( $variation = '', $flat = false ) {
 					if ( $term->slug == $value ) $value = $term->name;
 				endforeach;
 				$name = get_taxonomy( 'pa_'.$name )->labels->name;
+				// TODO: this is -not- a static class function and shouldn't be called like this Mr Gates
 				$name = jigoshop_product::attribute_label('pa_'.$name);
 			endif;
 
+			// TODO: if it is a custom text attribute, 'pa_' taxonomies are not created and we
+			// have no way to get the 'label' as submitted on the Edit Product->Attributes tab.
+			// (don't ask me why not, I don't know, but it seems that we should be creating taxonomies)
+			// this function really requires the product passed to it for: $product->attribute_label( $name )
 			if ($flat) :
-				$varation_list[] = $name.': '.$value;
+				$variation_list[] = $name.': '.$value;
 			else :
-				$varation_list[] = '<dt>'.$name.':</dt><dd>'.$value.'</dd>';
+				$variation_list[] = '<dt>'.$name.':</dt><dd>'.$value.'</dd>';
 			endif;
 
 		endforeach;
 
 		if ($flat) :
-			$return .= implode(', ', $varation_list);
+			$return .= implode(', ', $variation_list);
 		else :
-			$return .= implode('', $varation_list);
+			$return .= implode('', $variation_list);
 		endif;
 
 		if (!$flat) :
@@ -1114,18 +1139,23 @@ function jigoshop_comments($comment, $args, $depth) {
 add_filter( 'comments_clauses', 'jigoshop_exclude_order_admin_comments', 10, 1);
 function jigoshop_exclude_order_admin_comments( $clauses ) {
 
-	// NOTE: bit of a hack, tests if we're in the admin & its an ajax call
-	// Don't hide when viewing orders in admin
-	// TODO: removing the is_ajax() call for version 1.6, isn't working for some reason, order notes were not appearing in Admin
-	if ( is_admin() ) {
-		return $clauses;
-	}
+	global $wpdb, $typenow, $pagenow;
 
-	// Hide all those comments which are of type jigoshop or order_note
-	$clauses['where'] .= ' AND comment_type != "jigoshop"';
-	$clauses['where'] .= ' AND comment_type != "order_note"'; // Removes order notes
+	// NOTE: bit of a hack, tests if we're in the admin & its an ajax call
+	if ( is_admin() && ( $typenow == 'shop_order' || $pagenow == 'admin-ajax.php' ) && current_user_can( 'manage_jigoshop' ) )
+		return $clauses; // Don't hide when viewing orders in admin
+
+	if ( ! $clauses['join'] ) $clauses['join'] = '';
+
+	if ( ! strstr( $clauses['join'], "JOIN $wpdb->posts" ) )
+		$clauses['join'] .= " LEFT JOIN $wpdb->posts ON $wpdb->comments.comment_post_ID = $wpdb->posts.ID ";
+
+	if ( $clauses['where'] ) $clauses['where'] .= ' AND ';
+
+	$clauses['where'] .= " $wpdb->posts.post_type NOT IN ('shop_order') ";
 
 	return $clauses;
+
 }
 
 /**

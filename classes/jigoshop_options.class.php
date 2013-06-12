@@ -736,7 +736,7 @@ class Jigoshop_Options implements Jigoshop_Options_Interface {
 			'desc' 		=> '',
 			'tip' 		=> __('Enabling this setting will display a "Return to Shop" button on the Cart page along with the "Continue to Checkout" button.','jigoshop'),
 			'id' 		=> 'jigoshop_cart_shows_shop_button',
-			'std' 		=> 'no',
+			'std' 		=> 'yes',
 			'type' 		=> 'checkbox',
 			'choices'	=> array(
 				'no'			=> __('No', 'jigoshop'),
@@ -812,9 +812,9 @@ class Jigoshop_Options implements Jigoshop_Options_Interface {
 		);
 
 		self::$default_options[] = array(
-			'name'		=> __('Disable bundled Fancybox','jigoshop'),
-			'desc' 		=> '',
-			'tip' 		=> __('Useful if or one of your plugin already loads the Fancybox script and css. But be careful, Jigoshop will still try to open product images using Fancybox.','jigoshop'),
+			'name'		=> __('Disable bundled Lightbox','jigoshop'),
+			'desc' 		=> __('Product galleries and images as well as the Add Review form will open in a lightbox.','jigoshop'),
+			'tip' 		=> __('Useful if your theme or other plugin already loads our Lightbox script and css (prettyPhoto), or you want to use a different one.','jigoshop'),
 			'id' 		=> 'jigoshop_disable_fancybox',
 			'std' 		=> 'no',
 			'type' 		=> 'checkbox',
@@ -1338,7 +1338,7 @@ class Jigoshop_Options implements Jigoshop_Options_Interface {
 		 * Products & Inventory Tab
 		 *------------------------------------------------------------------------------------------
 		*/
-		self::$default_options[] = array( 'type' => 'tab', 'name' => __('Products &amp; Inventory', 'jigoshop') );
+		self::$default_options[] = array( 'type' => 'tab', 'name' => __('Products & Inventory', 'jigoshop') );
 
 		self::$default_options[] = array( 'name' => __('Product Options', 'jigoshop'), 'type' => 'title', 'desc' => '' );
 
@@ -1556,7 +1556,7 @@ class Jigoshop_Options implements Jigoshop_Options_Interface {
 			'desc' 		=> __('This will only apply to the Shop, Category and Product pages.','jigoshop'),
 			'tip' 		=> __('This will have no effect on the Cart, Checkout, Emails, or final Orders; prices are always shown with tax out.','jigoshop'),
 			'id' 		=> 'jigoshop_prices_include_tax',
-			'std' 		=> 'yes',
+			'std' 		=> 'no',
 			'type' 		=> 'checkbox',
 			'choices'	=> array(
 				'no'			=> __('No', 'jigoshop'),
@@ -1634,7 +1634,7 @@ class Jigoshop_Options implements Jigoshop_Options_Interface {
 			'desc' 		=> __('This will have no effect if "Only ship to billing address" is activated.','jigoshop'),
 			'tip' 		=> __('When activated, Shipping address fields will appear by default on the Checkout.','jigoshop'),
 			'id' 		=> 'jigoshop_show_checkout_shipping_fields',
-			'std' 		=> 'yes',
+			'std' 		=> 'no',
 			'type' 		=> 'checkbox',
 			'choices'	=> array(
 				'no'			=> __('No', 'jigoshop'),
@@ -1642,7 +1642,7 @@ class Jigoshop_Options implements Jigoshop_Options_Interface {
 			)
 		);
 
-		self::$default_options[] = array( 'name' => __('Available Shipping Methods', 'jigoshop'), 'type' => 'title', 'desc' => '' );
+		self::$default_options[] = array( 'name' => __('Available Shipping Methods', 'jigoshop'), 'type' => 'title', 'desc' => __('Please enable all of the Shipping Methods you wish to make available to your customers.', 'jigoshop') );
 
 		self::$default_options[] = array( 'type' => 'shipping_options');  // required only for backwards compatibility.
 
@@ -1652,7 +1652,19 @@ class Jigoshop_Options implements Jigoshop_Options_Interface {
 		*/
 		self::$default_options[] = array( 'type' => 'tab', 'name' => __('Payment Gateways', 'jigoshop') );
 
-		self::$default_options[] = array( 'name' => __('Available gateways', 'jigoshop'), 'type' => 'title', 'desc' => '' );
+		self::$default_options[] = array( 'name' => __('Gateway Options', 'jigoshop'), 'type' => 'title', 'desc' => '' );
+
+		self::$default_options[] = array(
+			'name'		=> __( 'Default Gateway', 'jigoshop' ),
+			'desc' 		=> __('Only enabled gateways will appear in this list.','jigoshop'),
+			'tip' 		=> __('This will determine which gateway appears first in the Payment Methods list on the Checkout.','jigoshop'),
+			'id' 		=> 'jigoshop_default_gateway',
+			'std' 		=> 'cheque',
+			'type' 		=> 'default_gateway',
+			'choices'	=> apply_filters( 'jigoshop_available_payment_gateways', array() )
+		);
+
+		self::$default_options[] = array( 'name' => __('Available gateways', 'jigoshop'), 'type' => 'title', 'desc' => __('Please enable all of the Payment Gateways you wish to make available to your customers.', 'jigoshop') );
 
 		self::$default_options[] = array( 'type' => 'gateway_options');  // required only for backwards compatibility.
 

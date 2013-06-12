@@ -235,7 +235,7 @@ class Jigoshop_Admin_Settings extends Jigoshop_Singleton {
 			</div>
 
 			<script type="text/javascript">
-				/*<![CDATA[*/
+			/*<![CDATA[*/
 				jQuery(function($) {
 
 					// Fade out the status message
@@ -258,7 +258,7 @@ class Jigoshop_Admin_Settings extends Jigoshop_Singleton {
 					jQuery.get('<?php echo admin_url('options-permalink.php') ?>');
 
 				});
-				/*]]>*/
+			/*]]>*/
 			</script>
 
 			<?php do_action( 'jigoshop_settings_scripts' ); ?>
@@ -785,14 +785,40 @@ class Jigoshop_Options_Parser {
 
 		$display .= '<td class="forminp">';
 
-		// work off the option type and format output for display for each type
+
+		/*
+		 *  work off the option type and format output for display for each type
+		 */
 		switch ( $item['type'] ) {
+		
 		case 'user_defined':
 			if ( isset( $item['display'] ) ) {
 				if ( is_callable( $item['display'], true ) ) {
 					$display .= call_user_func( $item['display'] );
 				}
 			}
+			break;
+
+		case 'default_gateway':
+			$display .= '<select
+				id="'.$item['id'].'"
+				class="jigoshop-input jigoshop-select '.$class.'"
+				name="'.JIGOSHOP_OPTIONS.'['.$item['id'].']" >';
+			$gateways = jigoshop_payment_gateways::get_available_payment_gateways();
+			foreach ( $gateways as $slug => $gateway ) {
+				$display .= '<option value="'.esc_attr( $slug ).'" '.selected( $data[$item['id']], $slug, false ).' />'.$gateway->title.'</option>';
+			}
+			$display .= '</select>';
+			$id = $item['id'];
+			?>
+				<script type="text/javascript">
+				/*<![CDATA[*/
+					jQuery(function() {
+						jQuery("#<?php echo $id; ?>").select2({ width: '250px' });
+					});
+				/*]]>*/
+				</script>
+			<?php
 			break;
 
 		case 'gateway_options':
@@ -837,9 +863,11 @@ class Jigoshop_Options_Parser {
 			$display = $parts[0] . '<select id="'.$id.'" class="'.$class.'"' . $parts[1];
 			?>
 				<script type="text/javascript">
+				/*<![CDATA[*/
 					jQuery(function() {
 						jQuery("#<?php echo $id; ?>").select2({ width: '250px' });
 					});
+				/*]]>*/
 				</script>
 			<?php
 			break;
@@ -860,9 +888,11 @@ class Jigoshop_Options_Parser {
 			$display .= '</select>';
 			?>
 				<script type="text/javascript">
+				/*<![CDATA[*/
 					jQuery(function() {
 						jQuery("#<?php echo $id; ?>").select2({ width: '500px' });
 					});
+				/*]]>*/
 				</script>
 			<?php
 			break;
@@ -883,9 +913,11 @@ class Jigoshop_Options_Parser {
 			$id = $item['id'];
 			?>
 				<script type="text/javascript">
+				/*<![CDATA[*/
 					jQuery(function() {
 						jQuery("#<?php echo $id; ?>").select2({ width: '500px' });
 					});
+				/*]]>*/
 				</script>
 			<?php
 			break;
@@ -1091,9 +1123,11 @@ class Jigoshop_Options_Parser {
 			$id = $item['id'];
 			?>
 				<script type="text/javascript">
+				/*<![CDATA[*/
 					jQuery(function() {
 						jQuery("#<?php echo $id; ?>").select2({ width: '250px' });
 					});
+				/*]]>*/
 				</script>
 			<?php
 			break;
@@ -1236,9 +1270,11 @@ class Jigoshop_Options_Parser {
 							if ( isset( $rate['compound'] ) && $rate['compound'] == 'yes' ) echo 'checked="checked"';
 							echo ' /></td></tr>';
 							?><script type="text/javascript">
+							/*<![CDATA[*/
 								jQuery(function() {
 									jQuery("#tax_country_<?php echo esc_attr( $i ); ?>").select2();
 								});
+							/*]]>*/
 							</script><?php
 						endforeach;
 					endif;
@@ -1250,7 +1286,7 @@ class Jigoshop_Options_Parser {
 		</div>
 
 		<script type="text/javascript">
-		/* <![CDATA[ */
+		/*<![CDATA[*/
 			jQuery(function() {
 
 				jQuery(document.body).on('click', 'tr.tax_rate .select_none', function(){
@@ -1298,7 +1334,7 @@ class Jigoshop_Options_Parser {
 					return false;
 				});
 			});
-			/* ]]> */
+			/*]]>*/
 			</script>
 		<?php
 

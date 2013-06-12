@@ -2,9 +2,9 @@
 Contributors: Jigoshop
 Tags: ecommerce, wordpress ecommerce, store, shop, shopping, cart, checkout, widgets, reports, shipping, tax, paypal, jigowatt, shipping, inventory, stock, online, sell, sales, weights, dimensions, configurable, variable, downloadable, external, affiliate, download, virtual, physical
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal@jigowatt.co.uk&item_name=Donation+for+Jigoshop
-Requires at least: 3.4
-Tested up to: 3.5.1
-Stable tag: 1.6.2
+Requires at least: 3.5
+Tested up to: 3.6 Beta 3
+Stable tag: 1.7.1
 
 A feature-packed eCommerce plugin built upon WordPress core functionality ensuring excellent performance and customizability.
 
@@ -55,8 +55,8 @@ http://jigoshop.com
 
 = Requirements =
 
-* WordPress 3.3 or greater
-* PHP version 5.2.4 or greater
+* WordPress 3.5 or greater
+* PHP version 5.3 or greater
 * MySQL version 5.0 or greater
 * The mod_rewrite Apache module (for permalinks)
 * Some payment gateways require fsockopen support (for IPN access)
@@ -112,6 +112,54 @@ However, if you want priority, dedicated support from Jigoshop staff, we do offe
 4. Standard customer checkout screen
 
 == Changelog ==
+= 1.7.1 - 2013-06-10 =
+* Fix: FuturePay gateway is no longer enabled by default
+* Fix: FuturePay gateway has better error checking and display and thankyou page redirects
+* Fix: Product image galleries will now show properly in the lightbox with next/prev navigation
+* Fix: Product reviews will now function with the new lightbox
+* Fix: Cart is always cleared for payment Gateways with successful orders that direct to the thankyou page
+* Fix: Prevent non-products from being added to the Cart
+* Fix: Pending Orders still awaiting payment are no longer duplicated in the Admin with different ID
+* Fix: Template loader will again load 'loop-shop.php' from theme's for multiple shortcodes on a page
+* Fix: Paypal won't show a shipping line if there is no shipping cost
+* Fix: Allow custom text attributes for variations, display them in readable form
+* Fix: Database upgrade script for this version will update all products with quantities sold based on orders
+* Fix: Best Sellers widget will now correctly show top selling products based on quantity sold
+
+= 1.7 - 2013-06-04 =
+* New: Add Setting for Default Payment gateway on the Checkout
+* New: Add new FuturePay US gateway into the core.  Buy now, pay later, no credit card.
+* New: Remove Skrill gateway from the core.
+	* Updated standalone version is available: http://jigoshop.com/product/jigoshop-skrill/
+* Tweak: Re-factor Checkout display to increase conversions (affects form.php and review_order.php in themes)
+* Tweak: Eliminate Checkout errors from themes loading old jQuery. Jigoshop forces WordPress version to load.
+* Tweak: Replace product image lightbox implementation for W3C compliance
+* Tweak: Updated Checkout block-ui javascript for WordPress 3.6 jQuery compliance
+* Tweak: Load most javascript files in the footer for better page load performance
+* Tweak: Settings sections css for better appearance of modules
+* Tweak: Add Georgian Lari to currencies
+* Fix: Variable Products now correctly show variations on sale
+* Fix: Variable products out of stock when saving product will be hidden from front end if settings require it
+* Fix: Products on sale shortcode now shows variable products on sale
+* Translation: Updated Swedish translation courtesy of Peter Hjalmarsson
+* Translation: Updated .pot file for translators
+
+= 1.6.5 - 2013-04-25 =
+* Fix: Featured Product Widget Cache warning
+
+= 1.6.4 - 2013-04-22 =
+* Fix: My Account shortcode error will no longer require PHP 5.3
+
+= 1.6.3 - 2013-04-17 =
+* Fix: Order notes no longer appear in WordPress dashboard, still show on Orders
+* Fix: Add to Cart button redirect now redirects correctly to the Setting for Product, Cart, or Checkout
+* Fix: Payable 'pending' orders are now 'cancelled' on the My Account page if any products out of stock and backorders not allowed
+* Fix: Allow different WordPress table prefixes for sale short code
+* Fix: Allow the 'on_sale' template to be located within a theme
+* Fix: Shortcode for 'jigoshop_products' now uses the 'per_page' parameter from settings
+* Fix: Recent reviews widget no longer shows Anonymous as author on Home and Shop pages
+* Fix: When sending shipping info to PayPal, allow Puerto Rico to process as a US state
+
 = 1.6.2 - 2013-03-27 =
 * Tweak: Updated Spanish translation courtesy of David Bravo
 * Tweak: Updated Brazilian translations courtesy of Raphael Suzuki

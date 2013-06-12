@@ -88,6 +88,7 @@ function jigoshop_products( $atts ){
 	$args = array(
 		'post_type'          => 'product',
 		'post_status'        => 'publish',
+		'posts_per_page'     => $per_page,
 		'ignore_sticky_posts'=> 1,
 		'orderby'            => $orderby,
 		'order'              => $order,
@@ -361,29 +362,37 @@ function jigoshop_search_shortcode( $args ) {
 //### Sale products shortcode #########################################################
 
 function jigoshop_sale_products( $atts ) {
-	global $columns, $per_page, $paged, $wpdb;
 
-	extract(shortcode_atts(array(
-		'per_page'                  => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_per_page'),
-		'columns'                   => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_columns'),
-		'orderby'                   => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_sort_orderby'),
-		'order'                     => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_sort_direction'),
-		'pagination'                => false
-	), $atts));
-
-	$today = current_time('timestamp');
-
-	// TODO: currently as of Jigoshop 1.6, this still won't handle variations
-	$sql = "SELECT wp_posts.* FROM wp_posts INNER JOIN wp_postmeta ON (wp_posts.ID = wp_postmeta.post_id) INNER JOIN wp_postmeta AS mt1 ON (wp_posts.ID = mt1.post_id) INNER JOIN wp_postmeta AS mt2 ON (wp_posts.ID = mt2.post_id) INNER JOIN wp_postmeta AS mt3 ON (wp_posts.ID = mt3.post_id) INNER JOIN wp_postmeta AS mt4 ON (wp_posts.ID = mt4.post_id) INNER JOIN wp_postmeta AS mt5 ON (wp_posts.ID = mt5.post_id) WHERE 1=1 AND wp_posts.post_type = 'product' AND (wp_posts.post_status = 'publish') AND ( (wp_postmeta.meta_key = 'visibility' AND CAST(wp_postmeta.meta_value AS CHAR) IN ('catalog','visible')) AND (mt1.meta_key = 'sale_price' AND CAST(mt1.meta_value AS CHAR) != '') AND ((mt2.meta_key = 'sale_price_dates_from' AND CAST(mt2.meta_value AS SIGNED) <= %d) OR (mt3.meta_key = 'sale_price_dates_from' AND CAST(mt3.meta_value AS CHAR) = '')) AND ((mt4.meta_key = 'sale_price_dates_to' AND CAST(mt4.meta_value AS SIGNED) >= %d) OR (mt5.meta_key = 'sale_price_dates_to' AND CAST(mt5.meta_value AS CHAR) = '') )) GROUP BY wp_posts.ID ORDER BY wp_posts.post_title ".$order;
-	
 	global $jigoshop_sale_products;
-	$jigoshop_sale_products = $wpdb->get_results( $wpdb->prepare( $sql, $today, $today ), OBJECT );
+
+	extract( shortcode_atts( array(
+		'per_page'          => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_per_page'),
+		'columns'           => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_columns'),
+		'orderby'           => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_sort_orderby'),
+		'order'             => Jigoshop_Base::get_options()->get_option('jigoshop_catalog_sort_direction'),
+		'pagination'        => false
+		), $atts ) );
+
+	$args = array(
+		'posts_per_page'    => $per_page,
+		'orderby'           => $orderby,
+		'order'             => $order,
+		'no_found_rows'     => 1,
+		'post_status'       => 'publish',
+		'post_type'         => 'product',
+		'post__in'          => jigoshop_product::get_product_ids_on_sale()
+	);
+
+	$jigoshop_sale_products = get_posts( $args );
+
 	ob_start();
-	load_template( jigoshop::plugin_path() . '/templates/loop-on_sale.php',false );
+	jigoshop_get_template_part( 'loop', 'on_sale' );
 	if ( $pagination ) do_action( 'jigoshop_pagination' );
+	wp_reset_postdata();
+	
 	return ob_get_clean();	
+
 }
-add_shortcode('sale_products', 'jigoshop_sale_products');
 
 //### Shortcodes #########################################################
 
@@ -396,6 +405,7 @@ add_shortcode('product_search'          , 'jigoshop_search_shortcode');
 add_shortcode('recent_products'         , 'jigoshop_recent_products');
 add_shortcode('featured_products'       , 'jigoshop_featured_products');
 add_shortcode('jigoshop_category'       , 'jigoshop_product_category');
+add_shortcode('sale_products'           , 'jigoshop_sale_products');
 
 add_shortcode('jigoshop_cart'           , 'get_jigoshop_cart');
 add_shortcode('jigoshop_checkout'       , 'get_jigoshop_checkout');

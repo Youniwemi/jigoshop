@@ -49,8 +49,9 @@ class jigoshop_product extends Jigoshop_Base {
 	private $manage_stock = false;
 	private $stock_status = 'instock';
 	private $backorders;
-	public  $stock;       // : admin/jigoshop-admin-post-types.php on line 180
-	private $stock_sold;
+	public  $stock;         // : admin/jigoshop-admin-post-types.php on line 180
+	private $stock_sold;    // for managed stock only
+	private $quantity_sold; // all sales whether managed stock or not
 
 	private	$attributes   = array();
 	public  $children     = array(); // : jigoshop_template_functions.php on line 328
@@ -108,6 +109,7 @@ class jigoshop_product extends Jigoshop_Base {
 		$this->backorders            = isset($meta['backorders'][0]) ? $meta['backorders'][0] : null;
 		$this->stock                 = isset($meta['stock'][0]) ? $meta['stock'][0] : null;
 		$this->stock_sold            = isset($meta['stock_sold'][0]) ? $meta['stock_sold'][0] : null;
+		$this->quantity_sold         = isset($meta['quantity_sold'][0]) ? $meta['quantity_sold'][0] : null;
 
 		// filter for Paid Memberships Pro plugin courtesy @strangerstudios
 		$this->sale_price = apply_filters( 'jigoshop_sale_price' , $this->sale_price, $this );
@@ -162,7 +164,7 @@ class jigoshop_product extends Jigoshop_Base {
 			return $this->children;
 
 		// Get the child IDs
-		$this->children = get_posts(array(
+		$children = get_posts(array(
 			'post_parent'  => $this->ID,
 			'post_type'    => ($this->is_type('variable')) ? 'product_variation' : 'product',
 			'orderby'      => 'menu_order',
@@ -172,6 +174,8 @@ class jigoshop_product extends Jigoshop_Base {
 			'numberposts'  => -1
 		));
 
+		$this->children = apply_filters( 'jigoshop_get_product_children', $children, $this );
+		
 		return $this->children;
 	}
 
@@ -550,10 +554,8 @@ class jigoshop_product extends Jigoshop_Base {
 		if ( $this->is_type( array('grouped', 'variable') ) ) {
 
 			foreach( $this->get_children() as $child_ID ) {
-
 				$child = $this->get_child( $child_ID );
-				if( $child->is_on_sale() )
-					return true;
+				if ( $child->is_on_sale() ) return true;
 			}
 		}
 
@@ -562,12 +564,12 @@ class jigoshop_product extends Jigoshop_Base {
 		// Check if the sale is still in range (if we have a range)
 		if ( $this->sale_price_dates_from	<= $time &&
 			 $this->sale_price_dates_to		>= $time &&
-			 $this->sale_price)
+			 $this->sale_price) {
+			 
 			return true;
-
+		}
 		// Otherwise if we have a sale price
-		if ( ! $this->sale_price_dates_to && $this->sale_price )
-			return true;
+		if ( ! $this->sale_price_dates_to && $this->sale_price ) return true;
 
 		// Just incase return false
 		return false;
@@ -1301,7 +1303,7 @@ class jigoshop_product extends Jigoshop_Base {
 					$options = array();
 					$terms = wp_get_object_terms( $this->ID, 'pa_'.sanitize_title($attribute['name']), array( 'orderby' => 'slug' ) );
 
-					foreach($terms as $term) {
+					foreach ($terms as $term) {
 						$options[] = $term->slug;
 					}
 				}
@@ -1361,18 +1363,86 @@ class jigoshop_product extends Jigoshop_Base {
 	/**
 	 * Get a product attributes label
 	 */
+
 	public function attribute_label( $name ) {
 		global $wpdb;
 
 		if (strstr( $name, 'pa_' )) :
-			$name = str_replace( 'pa_', '', sanitize_title( $name ) );
+			$name = str_replace( 'pa_', '', sanitize_text_field( $name ) );
 
 			$label = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_label FROM ".$wpdb->prefix."jigoshop_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
 
-			if ($label) return $label; else return ucfirst($name);
-		else :
-			return $name;
+			if (!$label): $label = ucfirst($name); endif;
+		else :  // taxonomies aren't created for custom text attributes, get name from the attribute instead
+			$label = $name;
+			$attributes = $this->get_attributes();
+			foreach ( $attributes as $key => $attr ) {
+				if ( ! $attr['is_taxonomy'] && $key == $name ) {
+					$label = $attr['name'];
+					break;
+				}
+			}
 		endif;
+		return apply_filters('jigoshop_attribute_label',$label);
 	}
 
+	/**
+	 * Class Function that returns an array containing the IDs of the products that are on sale.
+	 *
+	 * @since 1.6.6
+	 * @return array
+	 */
+	public static function get_product_ids_on_sale() {
+
+		$product_ids_on_sale = get_transient( 'jigoshop_products_on_sale' );
+
+		if ( false !== $product_ids_on_sale ) return $product_ids_on_sale;
+
+		$on_sale = get_posts( array(
+			'post_type'      => array( 'product', 'product_variation' ),
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'meta_query'     => array(
+				array(
+					'key'        => 'sale_price',
+					'value'      => 0,
+					'compare'    => '>=',
+					'type'       => 'DECIMAL',
+				),
+				array(
+					'key'        => 'sale_price',
+					'value'      => '',
+					'compare'    => '!=',
+					'type'       => '',
+				)
+			),
+			'fields'         => 'id=>parent',
+		) );
+
+		$product_ids = array_keys( $on_sale );
+		$parent_ids  = array_values( $on_sale );
+
+		foreach ( $product_ids as $key => $id ) {
+			$sale_from = get_post_meta( $id, 'sale_price_dates_from', true );
+			if ( ! empty( $sale_from )) {
+				if ( $sale_from > current_time( 'timestamp' ) ) {
+					unset( $product_ids[ $key ] );
+					continue;
+				}
+			}
+			$sale_to = get_post_meta( $id, 'sale_price_dates_to', true );
+			if ( ! empty( $sale_to )) {
+				if ( $sale_to < current_time( 'timestamp' ) ) {
+					unset( $product_ids[ $key ] );
+				}
+			}
+		}
+
+		$product_ids_on_sale = array_unique( array_merge( $product_ids, $parent_ids ) );
+
+		set_transient( 'jigoshop_products_on_sale', $product_ids_on_sale );
+
+		return $product_ids_on_sale;
+	}
+	
 }

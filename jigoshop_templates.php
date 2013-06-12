@@ -86,12 +86,15 @@ add_filter( 'template_include', 'jigoshop_template_loader' );
 //################################################################################
 
 function jigoshop_get_template_part( $slug, $name = '' ) {
-	if ($name=='shop') :
-		if (!locate_template(array( 'loop-shop.php', JIGOSHOP_TEMPLATE_URL . 'loop-shop.php' ))) :
-			load_template( jigoshop::plugin_path() . '/templates/loop-shop.php',false );
+	$filename = $slug . '-' . $name . '.php';
+	if ( $name == 'shop' || $name == 'on_sale' ) {
+		// load template if found. priority order = theme, 'jigoshop' folder in theme
+		if ( ! locate_template( array( $filename, JIGOSHOP_TEMPLATE_URL . $filename ), true )) {
+			// if not found then load our default, always require template
+			load_template( jigoshop::plugin_path() . '/templates/' . $filename, false );
 			return;
-		endif;
-	endif;
+		}
+	}
 	get_template_part( JIGOSHOP_TEMPLATE_URL . $slug, $name );
 }
 
