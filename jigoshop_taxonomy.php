@@ -34,7 +34,8 @@ function jigoshop_post_type() {
 	$tag_slug = ( $jigoshop_options->get_option('jigoshop_product_tag_slug') ) ? $jigoshop_options->get_option('jigoshop_product_tag_slug') : _x('product-tag', 'slug', 'jigoshop');
 
 	$product_base = ( $jigoshop_options->get_option('jigoshop_prepend_shop_page_to_product') == 'yes' ) ? trailingslashit($base_slug) : trailingslashit(_x('product', 'slug', 'jigoshop'));
-
+	// nasty filter hack, urls messed up ( du to translation _x ) , this filter fixes a little 
+	$product_base = apply_filters('jigoshop_product_base_slug' , $product_base);
 	if ( $jigoshop_options->get_option('jigoshop_prepend_category_to_product') == 'yes' ) $product_base .= trailingslashit('%product_cat%');
 	$product_base = untrailingslashit($product_base);
 
