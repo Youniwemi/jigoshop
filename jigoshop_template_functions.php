@@ -1022,7 +1022,9 @@ if (!function_exists('jigoshop_breadcrumb')) {
 					$parents = array_reverse($parents);
 					foreach ($parents as $parent):
 						$item = get_term_by( 'id', $parent, get_query_var( 'taxonomy' ));
-						echo $before .  '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '">' . $item->name . '</a>' . $after . $delimiter;
+						$term_link= get_term_link( $item->slug, 'product_cat' );
+						if (  !($term_link instanceof WP_Error) )
+							echo $before .  '<a href="' . $term_link . '">' . $item->name . '</a>' . $after . $delimiter;
 					endforeach;
 				endif;
 
@@ -1083,7 +1085,9 @@ if (!function_exists('jigoshop_breadcrumb')) {
 							$parents = array_reverse($parents);
 							foreach ($parents as $parent):
 								$item = get_term_by( 'id', $parent, 'product_cat');
-								echo $before . '<a href="' . get_term_link( $item->slug, 'product_cat' ) . '">' . $item->name . '</a>' . $after . $delimiter;
+								$term_link= get_term_link( $item->slug, 'product_cat' );
+								if (  !($term_link instanceof WP_Error) )
+									echo $before . '<a href="' . $term_link . '">' . $item->name . '</a>' . $after . $delimiter;
 							endforeach;
 						endif;
 						echo $before . '<a href="' . get_term_link( $term->slug, 'product_cat' ) . '">' . $term->name . '</a>' . $after . $delimiter;
