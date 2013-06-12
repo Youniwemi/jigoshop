@@ -806,7 +806,7 @@ function get_jigoshop_currency_symbol() {
     $jigoshop_options = Jigoshop_Base::get_options();
 	$currency = $jigoshop_options->get_option('jigoshop_currency');
 	$symbols = jigoshop::currency_symbols();
-	$currency_symbol = $symbols[$currency];
+	$currency_symbol = isset( $symbols[$currency] ) ? $symbols[$currency] : '' ;
 	
 	return apply_filters('jigoshop_currency_symbol', $currency_symbol, $currency);
 	
