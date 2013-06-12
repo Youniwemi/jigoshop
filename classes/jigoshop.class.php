@@ -39,7 +39,7 @@ class jigoshop extends Jigoshop_Singleton {
 		self::$messages = (array) jigoshop_session::instance()->messages;
 
 		// uses jigoshop_base_class to provide class address for the filter
-		self::add_filter( 'wp_redirect', 'redirect', 1, 2 );
+		self::add_filter( 'wp_redirect', 'redirect', 0, 2 );
 	}
 
 	/**
