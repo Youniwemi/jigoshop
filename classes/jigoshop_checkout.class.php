@@ -1016,7 +1016,11 @@ class jigoshop_checkout extends Jigoshop_Singleton {
 						// Redirect to success/confirmation/payment page
 						if ($result['result']=='success') :
 
-							if (is_ajax()) :
+							
+							// return order, no redirect if REST
+							if ( defined('CHECKOUT_REST') ) :
+								return $order;
+							elseif (is_ajax()) :
 								echo json_encode(apply_filters('jigoshop_is_ajax_payment_successful', $result));
 								exit;
 							else :
@@ -1036,7 +1040,10 @@ class jigoshop_checkout extends Jigoshop_Singleton {
 
 						// Redirect to success/confirmation/payment page
 						$checkout_redirect = apply_filters( 'jigoshop_get_checkout_redirect_page_id', jigoshop_get_page_id('thanks') );
-						if (is_ajax()) :
+						// return order, no redirect if REST
+						if ( defined('CHECKOUT_REST') ) :
+							return $order;
+						elseif (is_ajax()) :
 							echo json_encode( array( 'result' => 'success', 'redirect' => get_permalink( $checkout_redirect ) ) );
 							exit;
 						else :
@@ -1054,7 +1061,10 @@ class jigoshop_checkout extends Jigoshop_Singleton {
 			endif;
 
 			// If we reached this point then there were errors
-			if (is_ajax()) :
+			// return order, no redirect if REST
+			if ( defined('CHECKOUT_REST') ) :
+				return jigoshop::$errors;
+			elseif (is_ajax()) :
 				jigoshop::show_messages();
 				exit;
 			else :
