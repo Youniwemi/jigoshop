@@ -127,7 +127,7 @@ class jigoshop_product_meta_variable extends jigoshop_product_meta
 	 * @param   int   Product ID
 	 * @return  void
 	 */
-	public function save( $parent_id ) {
+	public function save( $post_id, $post ) {
 		global $wpdb;
 
 		// Do not run if there are no variations
@@ -135,7 +135,7 @@ class jigoshop_product_meta_variable extends jigoshop_product_meta
 			return false;
 
 		// Get the attributes to be used later
-		$attributes = (array) maybe_unserialize( get_post_meta($parent_id, 'product_attributes', true) );
+		$attributes = (array) maybe_unserialize( get_post_meta($post_id, 'product_attributes', true) );
 
 		foreach ( $_POST['variations'] as $ID => $meta ) {
 
@@ -187,9 +187,9 @@ class jigoshop_product_meta_variable extends jigoshop_product_meta
 
 				if ( ! $duplicate ) {
 					$ID = wp_insert_post( array(
-						'post_title'  => !empty($title) ? $title : "#{$parent_id}: Child Variation",
+						'post_title'  => !empty($title) ? $title : "#{$post_id}: Child Variation",
 						'post_status' => isset($meta['enabled']) ? 'publish' : 'draft',
-						'post_parent' => $parent_id,
+						'post_parent' => $post_id,
 						'post_type'   => 'product_variation'
 					));
 				} else {
@@ -207,7 +207,7 @@ class jigoshop_product_meta_variable extends jigoshop_product_meta
 					}
 				}
 				$wpdb->update( $wpdb->posts, array(
-					'post_title'  => !empty($title) ? $title : "#{$parent_id}: Child Variation",
+					'post_title'  => !empty($title) ? $title : "#{$post_id}: Child Variation",
 					'post_status' => isset($meta['enabled']) ? 'publish' : 'draft'
 				), array( 'ID'    => $ID ) );
 			}
